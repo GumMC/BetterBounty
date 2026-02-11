@@ -7,14 +7,15 @@ public enum Queries {
             "playerName VARCHAR(32) NOT NULL," +
             "skinTexture TEXT," +
             "amount BIGINT NOT NULL," +
-            "lastUpdated BIGINT NOT NULL" +
+            "lastUpdated BIGINT NOT NULL," +
+            "lastPosterName VARCHAR(32)" +
             ");"),
 
     GET_ALL("SELECT * FROM %s"),
 
     DELETE_BOUNTY("DELETE FROM %s WHERE uniqueId = ?"),
 
-    SAVE_BOUNTY("REPLACE INTO %s (uniqueId, playerName, skinTexture, amount, lastUpdated) VALUES (?, ?, ?, ?, ?);"),
+    SAVE_BOUNTY("REPLACE INTO %s (uniqueId, playerName, skinTexture, amount, lastUpdated, lastPosterName) VALUES (?, ?, ?, ?, ?, ?);"),
 
     ;
 

@@ -73,8 +73,13 @@ public class SQLiteDatabase implements Database {
                 String skinTexture = resultSet.getString("skinTexture");
                 long amount = resultSet.getLong("amount");
                 long lastUpdated = resultSet.getLong("lastUpdated");
+                String lastPosterName = null;
+                try {
+                    lastPosterName = resultSet.getString("lastPosterName");
+                } catch (SQLException ignored) {
+                }
 
-                Bounty bounty = new Bounty(playerId, playerName, skinTexture, amount, lastUpdated);
+                Bounty bounty = new Bounty(playerId, playerName, skinTexture, amount, lastUpdated, lastPosterName);
                 plugin.getBountyManager().getBountyMap().put(bounty);
             }
         } catch (SQLException e) {
@@ -95,6 +100,7 @@ public class SQLiteDatabase implements Database {
                 statement.setString(3, bounty.getSkinTexture());
                 statement.setLong(4, bounty.getAmount());
                 statement.setLong(5, bounty.getLastUpdated());
+                statement.setString(6, bounty.getLastPosterName());
                 statement.addBatch();
             }
 

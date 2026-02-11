@@ -70,7 +70,17 @@ public class ChatUtils {
         if (config == null || path == null) return;
 
         if (config.isList(path)) {
-            sendMessage(sender, format(config.getStringList(path), placeholders));
+            List<String> raw = config.getStringList(path);
+            if (raw.isEmpty()) return;
+            if (raw.size() == 1) {
+                String only = raw.getFirst();
+                if (only == null) return;
+                String trimmed = only.trim();
+                if (trimmed.equals("[]") || trimmed.equals("[ ]")) return;
+                sendMessage(sender, format(only, placeholders));
+                return;
+            }
+            sendMessage(sender, format(raw, placeholders));
             return;
         }
 

@@ -14,5 +14,6 @@ public class Bounty {
     private String skinTexture;
     private long amount;
     private long lastUpdated;
+    private String lastPosterName;
 
 }

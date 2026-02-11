@@ -64,6 +64,7 @@ messages:
     - "<#FF5C5C><bold>(!)</bold> They have too many deaths (<#FFBDBD><deaths><#FF5C5C>, maximum: <#FFBDBD><max_deaths><#FF5C5C>)."
   cannot-add-yourself:
     - "<#FF5C5C><bold>(!)</bold> You cannot place a bounty on yourself."
+  unknown-poster: "Unknown"
   sort-types:
     AMOUNT: "<#03fcb1>Amount</#03fcb1>"
     LAST_UPDATED: "<#03fcb1>Recently Set</#03fcb1>"
