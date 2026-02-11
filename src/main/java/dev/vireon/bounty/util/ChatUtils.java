@@ -6,6 +6,7 @@ import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import org.bukkit.command.CommandSender;
+import org.bukkit.configuration.file.FileConfiguration;
 
 import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
@@ -60,6 +61,23 @@ public class ChatUtils {
 
     public static void sendMessage(CommandSender player, List<Component> components) {
         components.forEach(s -> ChatUtils.sendMessage(player, s));
+    }
+
+    /**
+     * Send a message loaded from configuration, supporting both single-line and multi-line values.
+     */
+    public static void sendConfigMessage(CommandSender sender, FileConfiguration config, String path, TagResolver... placeholders) {
+        if (config == null || path == null) return;
+
+        if (config.isList(path)) {
+            sendMessage(sender, format(config.getStringList(path), placeholders));
+            return;
+        }
+
+        String msg = config.getString(path);
+        if (msg == null || msg.isEmpty()) return;
+
+        sendMessage(sender, format(msg, placeholders));
     }
 
 }

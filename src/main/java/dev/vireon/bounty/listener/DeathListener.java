@@ -33,11 +33,11 @@ public class DeathListener implements Listener {
         plugin.getBountyManager().removeBounty(player.getUniqueId());
         plugin.getEconomyManager().add(killer, afterTaxAmount);
 
-        ChatUtils.sendMessage(killer, ChatUtils.format(
-                plugin.getConfig().getString("messages.bounty-claimed"),
+        ChatUtils.sendConfigMessage(killer, plugin.getConfig(), "messages.bounty-claimed",
+                Placeholder.unparsed("killer", killer.getName()),
                 Placeholder.unparsed("amount", ChatUtils.FORMATTER.format(afterTaxAmount)),
                 Placeholder.unparsed("player", bounty.getPlayerName())
-        ));
+        );
 
         String soundKey = plugin.getConfig().getString("settings.sounds.claim");
         if (soundKey != null && !soundKey.isEmpty()) {

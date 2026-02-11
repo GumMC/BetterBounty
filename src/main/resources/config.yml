@@ -1,9 +1,11 @@
 settings:
   maximum-bounty: 100000000 # 100 million, set to -1 for no limit
-  minimum-bounty: 1
+  minimum-bounty: 10000
+  skip-confirm-gui: true
+  search-enabled: false
   
   # Tax system for bounty claims (disabled by default)
-  tax: -1 # Tax percentage applied to bounty claims. Set to -1 or below to disable, 0+ to enable (e.g., 10 = 10% tax)
+  tax: 5 # Tax percentage applied to bounty claims. Set to -1 or below to disable, 0+ to enable (e.g., 10 = 10% tax)
   
   # Block placing bounties on players with bad stats
   stat-blocking:
@@ -23,28 +25,45 @@ settings:
     cancel: "minecraft:block.tripwire.click_on"
 
 messages:
-  no-perm: "<red>Not enough permission."
-  invalid-command: "<red>Invalid or wrong command. (or argument)"
-  player-not-found: "<red>Target player not found."
-  reload: "<green>Successfully reloaded."
+  no-perm:
+    - "<#FF5C5C><bold>(!)</bold> Not enough permission."
+  invalid-command:
+    - "<#FF5C5C><bold>(!)</bold> Invalid or wrong command. (or argument)"
+  player-not-found:
+    - "<#FF5C5C><bold>(!)</bold> Target player not found."
+  reload:
+    - "<#5CFF7A><bold>(!)</bold> Successfully reloaded."
 
-  click-cooldown: "<red>You must wait a few seconds before clicking again."
+  click-cooldown:
+    - "<#FFD65C><bold>(!)</bold> You must wait a few seconds before clicking again."
 
-  no-bounty: "<gray>This player has no bounty set."
-  bounty-removed: "<gray>Bounty removed successfully."
+  no-bounty:
+    - "<#B0B0B0><bold>(!)</bold> This player has no bounty set."
+  bounty-removed:
+    - "<#5CFF7A><bold>(!)</bold> Bounty removed successfully."
 
-  bounty-claimed: "<green>You claimed the bounty of <yellow>$<amount> <green>by killing <yellow><player><green>."
+  bounty-claimed:
+    - "<#5CFF7A><bold>(!)</bold> <killer> claimed a <bold><#B8FFD0>$<amount><#5CFF7A></bold> bounty for killing <#B8FFD0><player><#5CFF7A>!"
+    - "<#B0B0B0>Type <#E0E0E0>/bounty<#B0B0B0> to add a bounty to a player's head"
 
-  bounty-added: "<gray>You added <yellow>$<amount> <gray>to <yellow><player>'s <gray>bounty."
-  bounty-added-to-you: "<yellow><player> <gray>added <yellow>$<amount> <gray>to your bounty."
+  bounty-added:
+    - "<#FF5C5C><bold>(!)</bold> You added <#FFBDBD><amount><#FF5C5C> to <#FFBDBD><player><#FF5C5C>'s bounty."
+  bounty-added-to-you:
+    - "<#5CFF7A><bold>(!)</bold> <#B8FFD0><player><#5CFF7A> added <#B8FFD0><amount><#5CFF7A> to your bounty."
 
-  not-enough-money: "<red>Not enough money to set this bounty."
-  minimum-bounty: "<red>Minimum bounty is <yellow>$1."
-  maximum-bounty: "<red>Maximum bounty is <yellow>$100M."
+  not-enough-money:
+    - "<#FF5C5C><bold>(!)</bold> Not enough money to set this bounty."
+  minimum-bounty:
+    - "<#FF5C5C><bold>(!)</bold> Minimum bounty is <#FFBDBD><amount><#FF5C5C>."
+  maximum-bounty:
+    - "<#FF5C5C><bold>(!)</bold> Maximum bounty is <#FFBDBD><amount><#FF5C5C>."
   
-  bad-stats-kd: "<red>Cannot place bounty on this player - their K/D ratio is too low (<yellow><kd><red>, minimum: <yellow><min_kd><red>)."
-  bad-stats-deaths: "<red>Cannot place bounty on this player - they have too many deaths (<yellow><deaths><red>, maximum: <yellow><max_deaths><red>)."
-
+  bad-stats-kd:
+    - "<#FF5C5C><bold>(!)</bold> Cannot place bounty on this player - their K/D ratio is too low (<#FFBDBD><kd><#FF5C5C>, minimum: <#FFBDBD><min_kd><#FF5C5C>)."
+  bad-stats-deaths:
+    - "<#FF5C5C><bold>(!)</bold> They have too many deaths (<#FFBDBD><deaths><#FF5C5C>, maximum: <#FFBDBD><max_deaths><#FF5C5C>)."
+  cannot-add-yourself:
+    - "<#FF5C5C><bold>(!)</bold> You cannot place a bounty on yourself."
   sort-types:
     AMOUNT: "<#03fcb1>Amount</#03fcb1>"
     LAST_UPDATED: "<#03fcb1>Recently Set</#03fcb1>"
@@ -68,9 +87,32 @@ gui:
   items:
 
     bounty:
+      slots:
+        - 10
+        - 11
+        - 12
+        - 13
+        - 14
+        - 15
+        - 16
+        - 19
+        - 20
+        - 21
+        - 22
+        - 23
+        - 24
+        - 25
+        - 28
+        - 29
+        - 30
+        - 31
+        - 32
+        - 33
+        - 34
       name: "<#03fcb1><player>"
       lore:
         - "<white>Bounty: <#03fcb1><bounty>"
+        - "<gray>Last poster: <#03fcb1><poster>"
 
     info:
       slot: 40
@@ -107,6 +149,36 @@ gui:
       material: ARROW
       name: "<#03fcb1>ᴘʀᴇᴠɪᴏᴜs"
       lore: [ ]
+
+    filter:
+      material: GRAY_STAINED_GLASS_PANE
+      name: " "
+      lore: [ ]
+      slots:
+        - 0
+        - 1
+        - 2
+        - 3
+        - 4
+        - 5
+        - 6
+        - 7
+        - 8
+        - 9
+        - 17
+        - 18
+        - 26
+        - 27
+        - 35
+        - 36
+        - 44
+        - 46
+        - 47
+        - 48
+        - 49
+        - 50
+        - 51
+        - 52
 
 
 confirm-gui:

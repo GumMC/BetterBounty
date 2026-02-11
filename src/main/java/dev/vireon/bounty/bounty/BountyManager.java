@@ -40,6 +40,9 @@ public class BountyManager {
     @Getter
     private int maximumDeaths = 100;
 
+    // Track the last player who posted/added to a bounty (not persisted)
+    private final java.util.Map<UUID, String> lastPosterNames = new java.util.concurrent.ConcurrentHashMap<>();
+
     public void init() {
         max = plugin.getConfig().getLong("settings.maximum-bounty", 100_000_000);
         min = plugin.getConfig().getLong("settings.minimum-bounty", 1L);
@@ -68,6 +71,9 @@ public class BountyManager {
             }
         }
 
+        // Record the last poster name for display in GUI
+        lastPosterNames.put(playerId, player.getName());
+
         if (currentBounty == null) {
             OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(playerId);
             Bounty bounty = new Bounty(playerId, offlinePlayer.getName(), SkinUtils.getSkin(offlinePlayer), amount, System.currentTimeMillis());
@@ -80,6 +86,13 @@ public class BountyManager {
         plugin.getEconomyManager().remove(player, amount);
 
         return BountyResult.SUCCESS;
+    }
+
+    /**
+     * Get the last known poster name for a given bounty target.
+     */
+    public String getLastPosterName(UUID playerId) {
+        return lastPosterNames.getOrDefault(playerId, "Unknown");
     }
 
     public Bounty getBounty(UUID playerId) {

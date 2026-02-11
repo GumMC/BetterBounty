@@ -153,19 +153,19 @@ public final class BountyPlugin extends JavaPlugin {
         commandManager.registerCommand(new MainCommand(this));
 
         commandManager.registerMessage(MessageKey.INVALID_ARGUMENT, (sender, invalidArgumentContext) ->
-                ChatUtils.sendMessage(sender, ChatUtils.format(config.getString("messages.invalid-command"))));
+                ChatUtils.sendConfigMessage(sender, getConfig(), "messages.invalid-command"));
 
         commandManager.registerMessage(MessageKey.UNKNOWN_COMMAND, (sender, invalidArgumentContext) ->
-                ChatUtils.sendMessage(sender, ChatUtils.format(config.getString("messages.invalid-command"))));
+                ChatUtils.sendConfigMessage(sender, getConfig(), "messages.invalid-command"));
 
         commandManager.registerMessage(MessageKey.NOT_ENOUGH_ARGUMENTS, (sender, invalidArgumentContext) ->
-                ChatUtils.sendMessage(sender, ChatUtils.format(config.getString("messages.invalid-command"))));
+                ChatUtils.sendConfigMessage(sender, getConfig(), "messages.invalid-command"));
 
         commandManager.registerMessage(MessageKey.TOO_MANY_ARGUMENTS, (sender, invalidArgumentContext) ->
-                ChatUtils.sendMessage(sender, ChatUtils.format(config.getString("messages.invalid-command"))));
+                ChatUtils.sendConfigMessage(sender, getConfig(), "messages.invalid-command"));
 
         commandManager.registerMessage(BukkitMessageKey.NO_PERMISSION, (sender, invalidArgumentContext) ->
-                ChatUtils.sendMessage(sender, ChatUtils.format(config.getString("messages.no-perm"))));
+                ChatUtils.sendConfigMessage(sender, getConfig(), "messages.no-perm"));
     }
 
 }

@@ -8,6 +8,7 @@ import dev.triumphteam.cmd.core.annotation.SubCommand;
 import dev.triumphteam.cmd.core.annotation.Suggestion;
 import dev.vireon.bounty.BountyPlugin;
 import dev.vireon.bounty.bounty.BountyIndex;
+import dev.vireon.bounty.bounty.BountyResult;
 import dev.vireon.bounty.gui.ConfirmGui;
 import dev.vireon.bounty.gui.MainGui;
 import dev.vireon.bounty.util.ChatUtils;
@@ -32,8 +33,28 @@ public class MainCommand extends BaseCommand {
     }
 
     @SubCommand("add")
-    public void onAdd(Player player, Player target, long amount) {
-        ConfirmGui.open(player, plugin, target, amount);
+    public void onAdd(Player player, String targetName, long amount) {
+        OfflinePlayer target = plugin.getServer().getOfflinePlayer(targetName);
+
+        // Chỉ cho phép target là người chơi đã từng vào server (hoặc đang online)
+        if (!target.hasPlayedBefore() && !target.isOnline()) {
+            ChatUtils.sendConfigMessage(player, plugin.getConfig(), "messages.player-not-found");
+            return;
+        }
+
+        // Không cho tự đặt bounty lên bản thân
+        if (target.getUniqueId().equals(player.getUniqueId())) {
+            ChatUtils.sendConfigMessage(player, plugin.getConfig(), "messages.cannot-add-yourself");
+            return;
+        }
+
+        boolean skipConfirm = plugin.getConfig().getBoolean("settings.skip-confirm-gui", false);
+        if (skipConfirm) {
+            BountyResult result = plugin.getBountyManager().addBounty(player, target.getUniqueId(), amount);
+            ConfirmGui.handleResult(player, target, amount, result, plugin);
+        } else {
+            ConfirmGui.open(player, plugin, target, amount);
+        }
     }
 
     @SubCommand("remove")
@@ -41,7 +62,7 @@ public class MainCommand extends BaseCommand {
     public void onRemove(CommandSender sender, @Suggestion("online-players") String targetName) {
         OfflinePlayer target = plugin.getServer().getOfflinePlayer(targetName);
         if (!target.hasPlayedBefore()) {
-            ChatUtils.sendMessage(sender, ChatUtils.format(plugin.getConfig().getString("messages.player-not-found")));
+            ChatUtils.sendConfigMessage(sender, plugin.getConfig(), "messages.player-not-found");
             return;
         }
 
@@ -60,7 +81,7 @@ public class MainCommand extends BaseCommand {
     @Permission("bounty.reload")
     public void onReload(CommandSender sender) {
         plugin.getConfig().reload();
-        ChatUtils.sendMessage(sender, ChatUtils.format(plugin.getConfig().getString("messages.reload")));
+        ChatUtils.sendConfigMessage(sender, plugin.getConfig(), "messages.reload");
     }
 
 }

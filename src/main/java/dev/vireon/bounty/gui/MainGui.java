@@ -49,17 +49,25 @@ public class MainGui {
             bounties.removeIf(bounty -> !bounty.getPlayerName().toLowerCase().contains(filter.toLowerCase()));
         }
 
+        List<Integer> bountySlots = plugin.getConfig().getIntegerList("gui.items.bounty.slots");
+        int index = 0;
+
         for (Bounty bounty : bounties) {
+            if (index >= bountySlots.size()) break;
+
             SkullBuilder builder;
             if (bounty.getSkinTexture() != null) builder = PaperItemBuilder.skull().texture(bounty.getSkinTexture());
             else builder = PaperItemBuilder.skull();
 
-            gui.addItem(builder
+            gui.setItem(bountySlots.get(index), builder
                     .name(ChatUtils.format(plugin.getConfig().getString("gui.items.bounty.name"),
                             Placeholder.unparsed("player", bounty.getPlayerName())))
                     .lore(ChatUtils.format(plugin.getConfig().getStringList("gui.items.bounty.lore"),
-                            Placeholder.unparsed("bounty", ChatUtils.FORMATTER.format(bounty.getAmount()))))
+                            Placeholder.unparsed("bounty", ChatUtils.FORMATTER.format(bounty.getAmount())),
+                            Placeholder.unparsed("poster", plugin.getBountyManager().getLastPosterName(bounty.getPlayerId()))))
                     .asGuiItem());
+
+            index++;
         }
 
         setItem(plugin, "gui.items.info", sort, gui, event -> {
@@ -76,6 +84,14 @@ public class MainGui {
         });
         setItem(plugin, "gui.items.previous-page", sort, gui, event -> gui.previous());
         setItem(plugin, "gui.items.next-page", sort, gui, event -> gui.next());
+
+        for (int slot : plugin.getConfig().getIntegerList("gui.items.filter.slots")) {
+            gui.setItem(slot, PaperItemBuilder.from(Material.valueOf(plugin.getConfig().getString("gui.items.filter.material")))
+                    .name(ChatUtils.format(plugin.getConfig().getString("gui.items.filter.name")))
+                    .lore(ChatUtils.format(plugin.getConfig().getStringList("gui.items.filter.lore")))
+                    .asGuiItem());
+        }
+
         setItem(plugin, "gui.items.sort", sort, gui, event -> {
             if (CLICK_CACHE.getIfPresent(player.getUniqueId()) != null) {
                 plugin.getScheduler().runAtEntity(player, task -> player.playSound(Sound.sound(Key.key(plugin.getConfig().getString("settings.sounds.fail")), Sound.Source.MASTER, 1.0f, 1.0f)));
@@ -88,39 +104,41 @@ public class MainGui {
             plugin.getScheduler().runAtEntity(player, task -> player.playSound(Sound.sound(Key.key(plugin.getConfig().getString("settings.sounds.success")), Sound.Source.MASTER, 1.0f, 1.0f)));
             open(player, sort.next(), filter, plugin);
         });
-        setItem(plugin, "gui.items.search", sort, gui, event -> {
-            if (plugin.getFoliaLib().isFolia()) {
-                plugin.getScheduler().runAtEntity(player, _task -> player.playSound(Sound.sound(Key.key(plugin.getConfig().getString("settings.sounds.fail")), Sound.Source.MASTER, 1.0f, 1.0f)));
-                return;
-            }
+        if (plugin.getConfig().getBoolean("settings.search-enabled", true)) {
+            setItem(plugin, "gui.items.search", sort, gui, event -> {
+                if (plugin.getFoliaLib().isFolia()) {
+                    plugin.getScheduler().runAtEntity(player, _task -> player.playSound(Sound.sound(Key.key(plugin.getConfig().getString("settings.sounds.fail")), Sound.Source.MASTER, 1.0f, 1.0f)));
+                    return;
+                }
 
-            try {
-                SignGUI signGUI = SignGUI.builder()
-                        .setAdventureLines(ChatUtils.format(plugin.getConfig().getStringList("messages.sign.lines")).toArray())
-                        .setType(Material.valueOf(plugin.getConfig().getString("messages.sign.material", "OAK_SIGN").toUpperCase()))
-                        .setColor(DyeColor.valueOf(plugin.getConfig().getString("messages.sign.color", "WHITE").toUpperCase()))
-                        .setGlow(plugin.getConfig().getBoolean("messages.sign.glow"))
-                        .setHandler((p, result) -> {
-                            String input = result.getLine(0);
-                            if (input == null || input.isEmpty()) {
+                try {
+                    SignGUI signGUI = SignGUI.builder()
+                            .setAdventureLines(ChatUtils.format(plugin.getConfig().getStringList("messages.sign.lines")).toArray())
+                            .setType(Material.valueOf(plugin.getConfig().getString("messages.sign.material", "OAK_SIGN").toUpperCase()))
+                            .setColor(DyeColor.valueOf(plugin.getConfig().getString("messages.sign.color", "WHITE").toUpperCase()))
+                            .setGlow(plugin.getConfig().getBoolean("messages.sign.glow"))
+                            .setHandler((p, result) -> {
+                                String input = result.getLine(0);
+                                if (input == null || input.isEmpty()) {
+                                    return List.of(
+                                            SignGUIAction.run(() -> plugin.getScheduler().runAtEntity(player, task -> open(player, sort, null, plugin))),
+                                            SignGUIAction.run(() -> plugin.getScheduler().runAtEntity(player, task -> player.playSound(Sound.sound(Key.key(plugin.getConfig().getString("settings.sounds.fail")), Sound.Source.MASTER, 1.0f, 1.0f))))
+                                    );
+                                }
+
                                 return List.of(
-                                        SignGUIAction.run(() -> plugin.getScheduler().runAtEntity(player, task -> open(player, sort, null, plugin))),
-                                        SignGUIAction.run(() -> plugin.getScheduler().runAtEntity(player, task -> player.playSound(Sound.sound(Key.key(plugin.getConfig().getString("settings.sounds.fail")), Sound.Source.MASTER, 1.0f, 1.0f))))
+                                        SignGUIAction.run(() -> plugin.getScheduler().runAtEntity(player, task -> open(player, sort, input, plugin))),
+                                        SignGUIAction.run(() -> plugin.getScheduler().runAtEntity(player, task -> player.playSound(Sound.sound(Key.key(plugin.getConfig().getString("settings.sounds.success")), Sound.Source.MASTER, 1.0f, 1.0f))))
                                 );
-                            }
+                            })
+                            .build();
 
-                            return List.of(
-                                    SignGUIAction.run(() -> plugin.getScheduler().runAtEntity(player, task -> open(player, sort, input, plugin))),
-                                    SignGUIAction.run(() -> plugin.getScheduler().runAtEntity(player, task -> player.playSound(Sound.sound(Key.key(plugin.getConfig().getString("settings.sounds.success")), Sound.Source.MASTER, 1.0f, 1.0f))))
-                            );
-                        })
-                        .build();
-
-                signGUI.open(player);
-            } catch (SignGUIVersionException e) {
-                throw new RuntimeException(e);
-            }
-        });
+                    signGUI.open(player);
+                } catch (SignGUIVersionException e) {
+                    throw new RuntimeException(e);
+                }
+            });
+        }
 
         gui.open(player);
     }

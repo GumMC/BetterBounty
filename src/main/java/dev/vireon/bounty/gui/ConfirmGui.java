@@ -29,54 +29,7 @@ public class ConfirmGui {
             gui.close(player);
 
             BountyResult result = plugin.getBountyManager().addBounty(player, target.getUniqueId(), amount);
-            switch (result) {
-                case SUCCESS -> {
-                    if (target.isConnected()) {
-                        ChatUtils.sendMessage(target.getPlayer(), ChatUtils.format(
-                                plugin.getConfig().getString("messages.bounty-added-to-you"),
-                                Placeholder.unparsed("amount", ChatUtils.FORMATTER.format(amount)),
-                                Placeholder.unparsed("player", player.getName())
-                        ));
-                    }
-
-                    ChatUtils.sendMessage(player, ChatUtils.format(
-                            plugin.getConfig().getString("messages.bounty-added"),
-                            Placeholder.unparsed("amount", ChatUtils.FORMATTER.format(amount)),
-                            Placeholder.unparsed("player", target.getName() == null ? "---" : target.getName())
-                    ));
-                    plugin.getScheduler().runAtEntity(player, _task -> player.playSound(Sound.sound(Key.key(plugin.getConfig().getString("settings.sounds.success")), Sound.Source.MASTER, 1.0f, 1.0f)));
-                }
-                case MAXIMUM_EXCEEDED -> {
-                    plugin.getScheduler().runAtEntity(player, _task -> player.playSound(Sound.sound(Key.key(plugin.getConfig().getString("settings.sounds.fail")), Sound.Source.MASTER, 1.0f, 1.0f)));
-                    ChatUtils.sendMessage(player, ChatUtils.format(plugin.getConfig().getString("messages.maximum-bounty")));
-                }
-                case INVALID_AMOUNT -> {
-                    plugin.getScheduler().runAtEntity(player, _task -> player.playSound(Sound.sound(Key.key(plugin.getConfig().getString("settings.sounds.fail")), Sound.Source.MASTER, 1.0f, 1.0f)));
-                    ChatUtils.sendMessage(player, ChatUtils.format(plugin.getConfig().getString("messages.minimum-bounty")));
-                }
-                case NOT_ENOUGH_MONEY -> {
-                    plugin.getScheduler().runAtEntity(player, _task -> player.playSound(Sound.sound(Key.key(plugin.getConfig().getString("settings.sounds.fail")), Sound.Source.MASTER, 1.0f, 1.0f)));
-                    ChatUtils.sendMessage(player, ChatUtils.format(plugin.getConfig().getString("messages.not-enough-money")));
-                }
-                case BAD_STATS_KD -> {
-                    plugin.getScheduler().runAtEntity(player, _task -> player.playSound(Sound.sound(Key.key(plugin.getConfig().getString("settings.sounds.fail")), Sound.Source.MASTER, 1.0f, 1.0f)));
-                    double kd = plugin.getBountyManager().getPlayerKD(target.getUniqueId());
-                    ChatUtils.sendMessage(player, ChatUtils.format(
-                            plugin.getConfig().getString("messages.bad-stats-kd"),
-                            Placeholder.unparsed("kd", String.format("%.2f", kd)),
-                            Placeholder.unparsed("min_kd", String.format("%.2f", plugin.getBountyManager().getMinimumKd()))
-                    ));
-                }
-                case BAD_STATS_DEATHS -> {
-                    plugin.getScheduler().runAtEntity(player, _task -> player.playSound(Sound.sound(Key.key(plugin.getConfig().getString("settings.sounds.fail")), Sound.Source.MASTER, 1.0f, 1.0f)));
-                    int deaths = plugin.getBountyManager().getPlayerDeaths(target.getUniqueId());
-                    ChatUtils.sendMessage(player, ChatUtils.format(
-                            plugin.getConfig().getString("messages.bad-stats-deaths"),
-                            Placeholder.unparsed("deaths", String.valueOf(deaths)),
-                            Placeholder.unparsed("max_deaths", String.valueOf(plugin.getBountyManager().getMaximumDeaths()))
-                    ));
-                }
-            }
+            handleResult(player, target, amount, result, plugin);
         });
 
         gui.setCloseGuiAction(event -> {
@@ -84,6 +37,53 @@ public class ConfirmGui {
         });
 
         gui.open(player);
+    }
+
+    public static void handleResult(Player player, OfflinePlayer target, long amount, BountyResult result, BountyPlugin plugin) {
+        switch (result) {
+            case SUCCESS -> {
+                if (target.isConnected()) {
+                    ChatUtils.sendConfigMessage(target.getPlayer(), plugin.getConfig(), "messages.bounty-added-to-you",
+                            Placeholder.unparsed("amount", ChatUtils.FORMATTER.format(amount)),
+                            Placeholder.unparsed("player", player.getName())
+                    );
+                }
+
+                ChatUtils.sendConfigMessage(player, plugin.getConfig(), "messages.bounty-added",
+                        Placeholder.unparsed("amount", ChatUtils.FORMATTER.format(amount)),
+                        Placeholder.unparsed("player", target.getName() == null ? "---" : target.getName())
+                );
+                plugin.getScheduler().runAtEntity(player, _task -> player.playSound(Sound.sound(Key.key(plugin.getConfig().getString("settings.sounds.success")), Sound.Source.MASTER, 1.0f, 1.0f)));
+            }
+            case MAXIMUM_EXCEEDED -> {
+                plugin.getScheduler().runAtEntity(player, _task -> player.playSound(Sound.sound(Key.key(plugin.getConfig().getString("settings.sounds.fail")), Sound.Source.MASTER, 1.0f, 1.0f)));
+                ChatUtils.sendConfigMessage(player, plugin.getConfig(), "messages.maximum-bounty");
+            }
+            case INVALID_AMOUNT -> {
+                plugin.getScheduler().runAtEntity(player, _task -> player.playSound(Sound.sound(Key.key(plugin.getConfig().getString("settings.sounds.fail")), Sound.Source.MASTER, 1.0f, 1.0f)));
+                ChatUtils.sendConfigMessage(player, plugin.getConfig(), "messages.minimum-bounty");
+            }
+            case NOT_ENOUGH_MONEY -> {
+                plugin.getScheduler().runAtEntity(player, _task -> player.playSound(Sound.sound(Key.key(plugin.getConfig().getString("settings.sounds.fail")), Sound.Source.MASTER, 1.0f, 1.0f)));
+                ChatUtils.sendConfigMessage(player, plugin.getConfig(), "messages.not-enough-money");
+            }
+            case BAD_STATS_KD -> {
+                plugin.getScheduler().runAtEntity(player, _task -> player.playSound(Sound.sound(Key.key(plugin.getConfig().getString("settings.sounds.fail")), Sound.Source.MASTER, 1.0f, 1.0f)));
+                double kd = plugin.getBountyManager().getPlayerKD(target.getUniqueId());
+                ChatUtils.sendConfigMessage(player, plugin.getConfig(), "messages.bad-stats-kd",
+                        Placeholder.unparsed("kd", String.format("%.2f", kd)),
+                        Placeholder.unparsed("min_kd", String.format("%.2f", plugin.getBountyManager().getMinimumKd()))
+                );
+            }
+            case BAD_STATS_DEATHS -> {
+                plugin.getScheduler().runAtEntity(player, _task -> player.playSound(Sound.sound(Key.key(plugin.getConfig().getString("settings.sounds.fail")), Sound.Source.MASTER, 1.0f, 1.0f)));
+                int deaths = plugin.getBountyManager().getPlayerDeaths(target.getUniqueId());
+                ChatUtils.sendConfigMessage(player, plugin.getConfig(), "messages.bad-stats-deaths",
+                        Placeholder.unparsed("deaths", String.valueOf(deaths)),
+                        Placeholder.unparsed("max_deaths", String.valueOf(plugin.getBountyManager().getMaximumDeaths()))
+                );
+            }
+        }
     }
 
     private static void setItem(BountyPlugin plugin, String path, Gui gui, String playerName, long amount, GuiAction<InventoryClickEvent> action) {
